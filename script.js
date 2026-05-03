@@ -7,6 +7,7 @@ const countdown = document.querySelector("#countdown");
 const lightbox = document.querySelector("#lightbox");
 const lightboxImage = lightbox?.querySelector("img");
 const lightboxClose = lightbox?.querySelector(".lightbox-close");
+const coverWeddingSong = document.querySelector("#coverWeddingSong");
 const weddingSong = document.querySelector("#weddingSong");
 const musicToggle = document.querySelector("#musicToggle");
 const anniversaryCount = document.querySelector("#anniversaryCount");
@@ -73,6 +74,21 @@ function startPageTransitionEntry() {
 function startCoverNavigation() {
   if (!openButton) return;
 
+  let triedCoverSong = false;
+  const playCoverSong = () => {
+    if (!coverWeddingSong || triedCoverSong) return;
+
+    triedCoverSong = true;
+    coverWeddingSong.volume = 0.58;
+    coverWeddingSong.play().catch(() => {
+      // Some in-app browsers still block audio; the invitation page button remains the fallback.
+    });
+  };
+
+  openButton.addEventListener("pointerdown", playCoverSong, { passive: true });
+  openButton.addEventListener("touchstart", playCoverSong, { passive: true });
+  openButton.addEventListener("mousedown", playCoverSong);
+
   openButton.addEventListener("click", () => {
     const target = openButton.dataset.target || "invitation.html";
 
@@ -82,6 +98,8 @@ function startCoverNavigation() {
     } catch {
       // Opening the invitation should still work if storage is blocked.
     }
+
+    playCoverSong();
 
     ensurePageTransitionText();
     body.classList.add("page-exit");
