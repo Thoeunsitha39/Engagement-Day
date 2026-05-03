@@ -260,6 +260,7 @@ body.cover-page {
 
 .cover-hero {
   position: relative;
+  width: 100%;
   min-height: 100svh;
   display: grid;
   place-items: center;
@@ -272,13 +273,17 @@ body.cover-page {
   background:
     radial-gradient(circle at 50% 20%, rgba(255, 247, 220, .62), transparent 34%),
     linear-gradient(135deg, #ead3a3 0%, #fff1c9 48%, #c49749 100%);
-  padding: clamp(8px, 2vw, 18px);
+  padding-block: clamp(8px, 2vw, 18px);
+  padding-inline: 12px;
+  padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
 }
 
 .khmer-poster {
   position: relative;
+  justify-self: center;
   container-type: inline-size;
-  width: min(calc(100vw - 16px), calc((100svh - 16px) * .6667), 700px);
+  width: min(100%, 700px);
+  margin-inline: auto;
   aspect-ratio: 1024 / 1536;
   overflow: hidden;
   background: url("assets/images/khmer-invitation-bg.png") center / cover no-repeat;
