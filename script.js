@@ -9,6 +9,11 @@ const lightboxImage = lightbox?.querySelector("img");
 const lightboxClose = lightbox?.querySelector(".lightbox-close");
 const weddingSong = document.querySelector("#weddingSong");
 const musicToggle = document.querySelector("#musicToggle");
+const anniversaryCount = document.querySelector("#anniversaryCount");
+const singlePromptButton = document.querySelector("#singlePromptButton");
+const singleModal = document.querySelector("#singleModal");
+const singleModalClose = document.querySelector("#singleModalClose");
+const singleModalCountdown = document.querySelector("#singleModalCountdown");
 const effectSelector = [
   ".effect-zoom-in",
   ".effect-slide-up",
@@ -109,6 +114,50 @@ function startCountdown() {
   window.setInterval(tick, 1000);
 }
 
+function getCalendarDifference(startDate, endDate) {
+  if (endDate < startDate) {
+    return { years: 0, months: 0, days: 0 };
+  }
+
+  let years = endDate.getFullYear() - startDate.getFullYear();
+  let months = endDate.getMonth() - startDate.getMonth();
+  let days = endDate.getDate() - startDate.getDate();
+
+  if (days < 0) {
+    months -= 1;
+    days += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate();
+  }
+
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+
+  return { years, months, days };
+}
+
+function startAnniversaryCount() {
+  if (!anniversaryCount) return;
+
+  const startDate = new Date(anniversaryCount.dataset.start);
+  if (Number.isNaN(startDate.getTime())) return;
+
+  const setValue = (key, value) => {
+    const element = anniversaryCount.querySelector(`[data-anniversary="${key}"]`);
+    if (element) element.textContent = String(value).padStart(2, "0");
+  };
+
+  const tick = () => {
+    const elapsed = getCalendarDifference(startDate, new Date());
+    setValue("years", elapsed.years);
+    setValue("months", elapsed.months);
+    setValue("days", elapsed.days);
+  };
+
+  tick();
+  window.setInterval(tick, 3600000);
+}
+
 function openLightbox(src, alt) {
   if (!lightbox || !lightboxImage || !src) return;
   lightboxImage.src = src;
@@ -140,6 +189,61 @@ function startGalleryLightbox() {
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeLightbox();
+  });
+}
+
+function startSingleModal() {
+  if (!singlePromptButton || !singleModal || !singleModalCountdown) return;
+
+  let countdownTimer = null;
+  let closeTimer = null;
+  let remainingSeconds = 10;
+
+  const setCountdown = (value) => {
+    singleModalCountdown.textContent = String(value);
+  };
+
+  const clearTimers = () => {
+    window.clearInterval(countdownTimer);
+    window.clearTimeout(closeTimer);
+    countdownTimer = null;
+    closeTimer = null;
+  };
+
+  const closeModal = () => {
+    clearTimers();
+    singleModal.classList.remove("is-open");
+    singleModal.setAttribute("aria-hidden", "true");
+  };
+
+  const openModal = () => {
+    clearTimers();
+    remainingSeconds = 10;
+    setCountdown(remainingSeconds);
+    singleModal.classList.add("is-open");
+    singleModal.setAttribute("aria-hidden", "false");
+
+    countdownTimer = window.setInterval(() => {
+      remainingSeconds = Math.max(0, remainingSeconds - 1);
+      setCountdown(remainingSeconds);
+      if (remainingSeconds === 0) {
+        closeModal();
+      }
+    }, 1000);
+
+    closeTimer = window.setTimeout(closeModal, 10000);
+  };
+
+  singlePromptButton.addEventListener("click", openModal);
+  singleModalClose?.addEventListener("click", closeModal);
+  singleModal.addEventListener("click", (event) => {
+    if (event.target === singleModal) closeModal();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && singleModal.classList.contains("is-open")) {
+      closeModal();
+    }
   });
 }
 
@@ -265,7 +369,9 @@ if (!redirectInvitationReload()) {
   startCoverNavigation();
   startPageTransitionEntry();
   startCountdown();
+  startAnniversaryCount();
   startGalleryLightbox();
+  startSingleModal();
   startTextEffects();
   startWeddingMusic();
   startFallingFlowers();

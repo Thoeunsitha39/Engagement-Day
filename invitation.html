@@ -121,6 +121,14 @@
             <img src="assets/photo-6.png" alt="Engagement photo 6" loading="lazy">
           </button>
         </div>
+        <div class="anniversary-count effect-zoom-in" id="anniversaryCount" data-start="2020-03-04T00:00:00+07:00" aria-label="Anniversary counter">
+          <p class="anniversary-label">Anniversary </p>
+          <div class="anniversary-grid">
+            <span><strong data-anniversary="years">00</strong><small>ឆ្នាំ</small></span>
+            <span><strong data-anniversary="months">00</strong><small>ខែ</small></span>
+            <span><strong data-anniversary="days">00</strong><small>ថ្ងៃ</small></span>
+          </div>
+        </div>
       </section>
 
       <!-- 5. Event detail -->
@@ -140,7 +148,8 @@
               </span>
               <div>
                 <strong>កាលបរិច្ឆេទ</strong>
-                <p>ថ្ងៃអាទិត្យ ទី១៧ ខែឧសភា ឆ្នាំ២០២៦</p>
+                <p>ថ្ងៃអាទិត្យ ១កើត ខែជេស្ឋ ឆ្នាំមមីរ អដ្ឋស័ក ពុទ្ធសករាជ ២៥៧០
+ត្រូវនឹងថ្ងៃអាទិត្យ ទី១៧ ខែឧសភា ឆ្នាំ២០២៦</p>
               </div>
             </div>
 
@@ -189,12 +198,28 @@
         <p class="section-copy effect-slide-up">សូមអរគុណចំពោះការចូលរួម និងការអបអរសាទររបស់លោកអ្នក។ វត្តមានរបស់លោកអ្នកគឺជាកិត្តិយសដ៏ធំធេងសម្រាប់យើងខ្ញុំ។</p>
       </section>
 
-      <p class="footer-note effect-rotate-fade">ធឿន ស៊ីថា&nbsp;<span>♡</span>&nbsp;ថាំង ពិសី</p>
+      <p class="footer-note effect-rotate-fade">
+        <span>អ្នក single</span>
+        <button class="single-link" id="singlePromptButton" type="button">ចុចនៅទីនេះ</button>
+      </p>
     </main>
 
     <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Photo preview">
       <button class="lightbox-close" type="button" aria-label="Close preview">&times;</button>
       <img src="" alt="">
+    </div>
+
+    <div class="single-modal" id="singleModal" aria-hidden="true" role="dialog" aria-labelledby="singleModalTitle">
+      <div class="single-modal-card">
+        <button class="single-modal-close" id="singleModalClose" type="button" aria-label="Close popup">&times;</button>
+        <img class="single-modal-image" src="assets/images/popup-minions.png" alt="" aria-hidden="true">
+        <p class="single-modal-kicker">Wedding Alert</p>
+        <h2 id="singleModalTitle">ហ្នឺងមែន? មុខអ្នកអត់គូ......</h2>
+        <p class="single-modal-count">
+          បិទដោយស្វ័យប្រវត្តិ
+          <strong id="singleModalCountdown">10</strong>
+        </p>
+      </div>
     </div>
 
     <audio id="weddingSong" src="assets/song/song_wedding.mp3" preload="auto" loop></audio>
