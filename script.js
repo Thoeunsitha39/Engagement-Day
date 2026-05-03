@@ -288,9 +288,11 @@ function startWeddingMusic() {
       musicToggle.classList.remove("needs-tap");
       await weddingSong.play();
       setMusicState(true);
+      return true;
     } catch {
       setMusicState(false);
       musicToggle.classList.add("needs-tap");
+      return false;
     }
   };
 
@@ -313,10 +315,32 @@ function startWeddingMusic() {
 
   setMusicState(false);
 
-  const startMusicOnInteraction = () => {
-    document.removeEventListener("click", startMusicOnInteraction);
-    document.removeEventListener("touchstart", startMusicOnInteraction);
-    if (weddingSong.paused) playSong();
+  const fallbackEvents = ["click", "touchstart", "pointerdown", "scroll"];
+  let musicStarted = false;
+  let attemptInFlight = false;
+
+  const removeFallbackListeners = () => {
+    fallbackEvents.forEach((event) => {
+      document.removeEventListener(event, fallbackHandler);
+    });
+  };
+
+  const fallbackHandler = async () => {
+    if (musicStarted || attemptInFlight) return;
+    if (!weddingSong.paused) {
+      musicStarted = true;
+      removeFallbackListeners();
+      return;
+    }
+
+    attemptInFlight = true;
+    const ok = await playSong();
+    attemptInFlight = false;
+
+    if (ok) {
+      musicStarted = true;
+      removeFallbackListeners();
+    }
   };
 
   const startInvitationMusic = async () => {
@@ -325,11 +349,16 @@ function startWeddingMusic() {
     } catch {
       // Some browsers throw if metadata is not yet ready; ignore and let play() handle it.
     }
-    await playSong();
-    if (weddingSong.paused) {
-      document.addEventListener("click", startMusicOnInteraction);
-      document.addEventListener("touchstart", startMusicOnInteraction);
+    const ok = await playSong();
+    if (ok) {
+      musicStarted = true;
+      return;
     }
+
+    // Messenger and other in-app browsers block autoplay; resume on the first user gesture.
+    fallbackEvents.forEach((event) => {
+      document.addEventListener(event, fallbackHandler, { passive: true });
+    });
   };
 
   if (document.readyState === "complete") {
