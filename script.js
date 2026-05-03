@@ -1,4 +1,3 @@
-const START_SONG_KEY = "startWeddingSong";
 const PAGE_TRANSITION_KEY = "showSamaiTransition";
 const PAGE_TRANSITION_TEXT = "សហសម័យ";
 const body = document.body;
@@ -7,7 +6,6 @@ const countdown = document.querySelector("#countdown");
 const lightbox = document.querySelector("#lightbox");
 const lightboxImage = lightbox?.querySelector("img");
 const lightboxClose = lightbox?.querySelector(".lightbox-close");
-const coverWeddingSong = document.querySelector("#coverWeddingSong");
 const weddingSong = document.querySelector("#weddingSong");
 const musicToggle = document.querySelector("#musicToggle");
 const anniversaryCount = document.querySelector("#anniversaryCount");
@@ -74,32 +72,14 @@ function startPageTransitionEntry() {
 function startCoverNavigation() {
   if (!openButton) return;
 
-  let triedCoverSong = false;
-  const playCoverSong = () => {
-    if (!coverWeddingSong || triedCoverSong) return;
-
-    triedCoverSong = true;
-    coverWeddingSong.volume = 0.58;
-    coverWeddingSong.play().catch(() => {
-      // Some in-app browsers still block audio; the invitation page button remains the fallback.
-    });
-  };
-
-  openButton.addEventListener("pointerdown", playCoverSong, { passive: true });
-  openButton.addEventListener("touchstart", playCoverSong, { passive: true });
-  openButton.addEventListener("mousedown", playCoverSong);
-
   openButton.addEventListener("click", () => {
     const target = openButton.dataset.target || "invitation.html";
 
     try {
-      sessionStorage.setItem(START_SONG_KEY, "true");
       sessionStorage.setItem(PAGE_TRANSITION_KEY, "true");
     } catch {
       // Opening the invitation should still work if storage is blocked.
     }
-
-    playCoverSong();
 
     ensurePageTransitionText();
     body.classList.add("page-exit");
@@ -331,17 +311,33 @@ function startWeddingMusic() {
   weddingSong.addEventListener("pause", () => setMusicState(false));
   weddingSong.addEventListener("ended", () => setMusicState(false));
 
-  let shouldStartSong = false;
-  try {
-    shouldStartSong = sessionStorage.getItem(START_SONG_KEY) === "true";
-    sessionStorage.removeItem(START_SONG_KEY);
-  } catch {
-    shouldStartSong = false;
-  }
-
   setMusicState(false);
-  if (shouldStartSong) {
-    window.setTimeout(playSong, 120);
+
+  const startMusicOnInteraction = () => {
+    document.removeEventListener("click", startMusicOnInteraction);
+    document.removeEventListener("touchstart", startMusicOnInteraction);
+    if (weddingSong.paused) playSong();
+  };
+
+  const startInvitationMusic = async () => {
+    try {
+      weddingSong.currentTime = 0;
+    } catch {
+      // Some browsers throw if metadata is not yet ready; ignore and let play() handle it.
+    }
+    await playSong();
+    if (weddingSong.paused) {
+      document.addEventListener("click", startMusicOnInteraction);
+      document.addEventListener("touchstart", startMusicOnInteraction);
+    }
+  };
+
+  if (document.readyState === "complete") {
+    window.setTimeout(startInvitationMusic, 120);
+  } else {
+    window.addEventListener("load", () => {
+      window.setTimeout(startInvitationMusic, 120);
+    }, { once: true });
   }
 }
 
